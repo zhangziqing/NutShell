@@ -6,14 +6,9 @@ module system_top (
   input [0:0]pcie_mgt_rxn,
   input [0:0]pcie_mgt_rxp,
   output [0:0]pcie_mgt_txn,
-  output [0:0]pcie_mgt_txp,
+  output [0:0]pcie_mgt_txp
   
-  output assert_clk,
-  output assert_rstn,
-  input  [ 31 : 0 ] cnt_data,
-  output [ 31 : 0 ] cnt_addr,
-  output            cnt_req,
-  input             cnt_ack
+
   //output [7:0] led
 );
 
@@ -65,7 +60,8 @@ module system_top (
     .coreclk(coreclk),
     .corerstn(corerstn),
     .uncoreclk(uncoreclk),
-    .uncorerstn(uncorerstn)
+    .uncorerstn(uncorerstn),
+    .assertion_failed(assertion_failed)
   );
 
   addr_mapper addr_mapper_i(
@@ -124,19 +120,34 @@ module system_top (
     .NutShell_io_ila_WBUrfData(NutShell_io_ila_WBUrfData),
     .NutShell_io_ila_InstrCnt(NutShell_io_ila_InstrCnt)
   );
-  
+  wire assert_clk;
+  wire assert_rstn;
+  wire  [ 31 : 0 ] cnt_data;
+  wire [ 31 : 0 ] cnt_addr;
+  wire            cnt_req;
+  wire             cnt_ack;
+  wire             assertion_failed;
   `define connect_external(name)\
         .io_extra``_``name(cnt``_``name)
         
   AXI4CNT axi4cnt_i(
     `axilite_connect_if(io_in, AXI_CNT),
-    .connect_external(data),
-    .connect_external(ack),
-    .connect_external(req),
-    .connect_external(addr)
+    `connect_external(data),
+    `connect_external(ack),
+    `connect_external(req),
+    `connect_external(addr)
   );
   
   assign assert_clk = coreclk;
   assign assert_rstn = corerstn_sync[1];
   
+  assertion_region assert_u(
+    .cnt_data(cnt_data),
+    .cnt_addr(cnt_addr),
+    .cnt_req(cnt_req),
+    .cnt_ack(cnt_ack),
+    .assertion_failed(assertion_failed),
+    .assert_clk(assert_clk),
+    .assert_rstn(assert_rstn)
+  );
 endmodule

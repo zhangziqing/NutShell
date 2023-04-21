@@ -26,6 +26,7 @@ class CacheCheckerWrapper(implicit val cacheConfig: CacheConfig) extends Module 
     cacheChecker.io.cacheHit := hit
     cacheChecker.io.mmio := mmio
     cacheChecker.io.probe := probe
+    cacheChecker.io.miss := miss
     cacheChecker.io.stage3MainState := stage3MainState
     cacheChecker.io.flush := io.flush
     cacheChecker.io.stage3MetaDirty := meta.dirty

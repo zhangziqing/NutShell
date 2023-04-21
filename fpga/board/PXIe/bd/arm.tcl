@@ -122,13 +122,13 @@ set bCheckIPsPassed 1
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
-xilinx.com:ip:proc_sys_reset:*\
 xilinx.com:ip:xlconcat:*\
 xilinx.com:ip:zynq_ultra_ps_e:*\
 xilinx.com:ip:axi_dma:*\
 xilinx.com:ip:axi_uartlite:*\
 xilinx.com:ip:axi_gpio:*\
 xilinx.com:ip:clk_wiz:*\
+xilinx.com:ip:proc_sys_reset:*\
 xilinx.com:ip:util_ds_buf:*\
 xilinx.com:ip:xdma:*\
 "
@@ -405,6 +405,7 @@ proc create_hier_cell_hier_clkrst { parentCell nameHier } {
   # Create pins
   create_bd_pin -dir I -type clk clk_in1
   create_bd_pin -dir O -type clk coreclk
+  create_bd_pin -dir O -from 0 -to 0 -type rst corerstn
   create_bd_pin -dir O -from 0 -to 0 -type rst interconnect_aresetn
   create_bd_pin -dir O locked
   create_bd_pin -dir I -type rst resetn
@@ -440,17 +441,21 @@ proc create_hier_cell_hier_clkrst { parentCell nameHier } {
    CONFIG.RESET_TYPE {ACTIVE_LOW} \
  ] $clk_wiz_0
 
+  # Create instance: corerst, and set properties
+  set corerst [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset corerst ]
+
   # Create instance: uncorerst, and set properties
   set uncorerst [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset uncorerst ]
 
   # Create port connections
   connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_pins uncoreclk] [get_bd_pins clk_wiz_0/uncoreclk] [get_bd_pins uncorerst/slowest_sync_clk]
-  connect_bd_net -net clk_wiz_0_coreclk [get_bd_pins coreclk] [get_bd_pins clk_wiz_0/coreclk]
+  connect_bd_net -net clk_wiz_0_coreclk [get_bd_pins coreclk] [get_bd_pins clk_wiz_0/coreclk] [get_bd_pins corerst/slowest_sync_clk]
   connect_bd_net -net clk_wiz_0_locked [get_bd_pins locked] [get_bd_pins clk_wiz_0/locked] [get_bd_pins uncorerst/dcm_locked]
+  connect_bd_net -net corerst_peripheral_aresetn [get_bd_pins corerstn] [get_bd_pins corerst/peripheral_aresetn]
   connect_bd_net -net proc_sys_reset_1_peripheral_aresetn [get_bd_pins uncorerstn] [get_bd_pins uncorerst/peripheral_aresetn]
   connect_bd_net -net rvcore_uncorerst_interconnect_aresetn [get_bd_pins interconnect_aresetn] [get_bd_pins uncorerst/interconnect_aresetn]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_clk1 [get_bd_pins clk_in1] [get_bd_pins clk_wiz_0/clk_in1]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins resetn] [get_bd_pins clk_wiz_0/resetn] [get_bd_pins uncorerst/ext_reset_in]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins resetn] [get_bd_pins clk_wiz_0/resetn] [get_bd_pins corerst/ext_reset_in] [get_bd_pins uncorerst/ext_reset_in]
 
   # Restore current instance
   current_bd_instance $oldCurInst
@@ -506,7 +511,9 @@ proc create_hier_cell_hier_arm_peripheral { parentCell nameHier } {
 
   # Create pins
   create_bd_pin -dir I -type rst S00_ARESETN
+  create_bd_pin -dir I -type clk coreclk
   create_bd_pin -dir O -from 0 -to 0 corerstn
+  create_bd_pin -dir I -from 0 -to 0 -type rst incorerstn
   create_bd_pin -dir O -type intr interrupt
   create_bd_pin -dir O -type intr mm2s_introut
   create_bd_pin -dir I rx
@@ -566,13 +573,15 @@ proc create_hier_cell_hier_arm_peripheral { parentCell nameHier } {
   connect_bd_intf_net -intf_net axi_interconnect_1_M02_AXI [get_bd_intf_pins axi_dma_arm/S_AXI_LITE] [get_bd_intf_pins axi_interconnect_1/M02_AXI]
 
   # Create port connections
+  connect_bd_net -net M03_ACLK_1 [get_bd_pins coreclk] [get_bd_pins axi_interconnect_1/M03_ACLK]
+  connect_bd_net -net M03_ARESETN_1 [get_bd_pins incorerstn] [get_bd_pins axi_interconnect_1/M03_ARESETN]
   connect_bd_net -net axi_dma_arm_mm2s_introut [get_bd_pins mm2s_introut] [get_bd_pins axi_dma_arm/mm2s_introut]
   connect_bd_net -net axi_dma_arm_s2mm_introut [get_bd_pins s2mm_introut] [get_bd_pins axi_dma_arm/s2mm_introut]
   connect_bd_net -net axi_gpio_0_gpio_io_o [get_bd_pins corerstn] [get_bd_pins corerst/gpio_io_o]
   connect_bd_net -net axi_uartlite_0_interrupt [get_bd_pins interrupt] [get_bd_pins axi_uartlite_0/interrupt]
   connect_bd_net -net axi_uartlite_0_tx [get_bd_pins tx] [get_bd_pins axi_uartlite_0/tx]
-  connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_pins uncoreclk] [get_bd_pins axi_dma_arm/m_axi_mm2s_aclk] [get_bd_pins axi_dma_arm/m_axi_s2mm_aclk] [get_bd_pins axi_dma_arm/m_axi_sg_aclk] [get_bd_pins axi_dma_arm/s_axi_lite_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_interconnect_0/S01_ACLK] [get_bd_pins axi_interconnect_0/S02_ACLK] [get_bd_pins axi_interconnect_0/S03_ACLK] [get_bd_pins axi_interconnect_1/ACLK] [get_bd_pins axi_interconnect_1/M00_ACLK] [get_bd_pins axi_interconnect_1/M01_ACLK] [get_bd_pins axi_interconnect_1/M02_ACLK] [get_bd_pins axi_interconnect_1/M03_ACLK] [get_bd_pins axi_interconnect_1/S00_ACLK] [get_bd_pins axi_uartlite_0/s_axi_aclk] [get_bd_pins corerst/s_axi_aclk]
-  connect_bd_net -net proc_sys_reset_1_peripheral_aresetn [get_bd_pins uncorerstn] [get_bd_pins axi_dma_arm/axi_resetn] [get_bd_pins axi_interconnect_1/M03_ARESETN] [get_bd_pins axi_uartlite_0/s_axi_aresetn] [get_bd_pins corerst/s_axi_aresetn]
+  connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_pins uncoreclk] [get_bd_pins axi_dma_arm/m_axi_mm2s_aclk] [get_bd_pins axi_dma_arm/m_axi_s2mm_aclk] [get_bd_pins axi_dma_arm/m_axi_sg_aclk] [get_bd_pins axi_dma_arm/s_axi_lite_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_interconnect_0/S01_ACLK] [get_bd_pins axi_interconnect_0/S02_ACLK] [get_bd_pins axi_interconnect_0/S03_ACLK] [get_bd_pins axi_interconnect_1/ACLK] [get_bd_pins axi_interconnect_1/M00_ACLK] [get_bd_pins axi_interconnect_1/M01_ACLK] [get_bd_pins axi_interconnect_1/M02_ACLK] [get_bd_pins axi_interconnect_1/S00_ACLK] [get_bd_pins axi_uartlite_0/s_axi_aclk] [get_bd_pins corerst/s_axi_aclk]
+  connect_bd_net -net proc_sys_reset_1_peripheral_aresetn [get_bd_pins uncorerstn] [get_bd_pins axi_dma_arm/axi_resetn] [get_bd_pins axi_uartlite_0/s_axi_aresetn] [get_bd_pins corerst/s_axi_aresetn]
   connect_bd_net -net rvcore_uncorerst_interconnect_aresetn [get_bd_pins S00_ARESETN] [get_bd_pins axi_interconnect_0/ARESETN] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins axi_interconnect_0/S01_ARESETN] [get_bd_pins axi_interconnect_0/S02_ARESETN] [get_bd_pins axi_interconnect_0/S03_ARESETN] [get_bd_pins axi_interconnect_1/ARESETN] [get_bd_pins axi_interconnect_1/M00_ARESETN] [get_bd_pins axi_interconnect_1/M01_ARESETN] [get_bd_pins axi_interconnect_1/M02_ARESETN] [get_bd_pins axi_interconnect_1/S00_ARESETN]
   connect_bd_net -net rx_1 [get_bd_pins rx] [get_bd_pins axi_uartlite_0/rx]
 
@@ -705,15 +714,16 @@ proc create_root_design { parentCell } {
 
 
   # Create ports
+  set assertion_failed [ create_bd_port -dir I -type intr assertion_failed ]
   set coreclk [ create_bd_port -dir O -type clk coreclk ]
   set_property -dict [ list \
-   CONFIG.ASSOCIATED_BUSIF {} \
+   CONFIG.ASSOCIATED_BUSIF {AXI_CNT} \
  ] $coreclk
   set corerstn [ create_bd_port -dir O -from 0 -to 0 corerstn ]
   set intrs [ create_bd_port -dir O -from 4 -to 0 intrs ]
   set uncoreclk [ create_bd_port -dir O -type clk uncoreclk ]
   set_property -dict [ list \
-   CONFIG.ASSOCIATED_BUSIF {AXI_MEM:AXI_MMIO:AXI_DMA:AXI_CNT} \
+   CONFIG.ASSOCIATED_BUSIF {AXI_MEM:AXI_MMIO:AXI_DMA} \
  ] $uncoreclk
   set uncorerstn [ create_bd_port -dir O -from 0 -to 0 -type rst uncorerstn ]
 
@@ -726,13 +736,10 @@ proc create_root_design { parentCell } {
   # Create instance: hier_rvcore_peripheral
   create_hier_cell_hier_rvcore_peripheral [current_bd_instance .] hier_rvcore_peripheral
 
-  # Create instance: rst_ps8_0_99M, and set properties
-  set rst_ps8_0_99M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset rst_ps8_0_99M ]
-
   # Create instance: xlconcat_1, and set properties
   set xlconcat_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat xlconcat_1 ]
   set_property -dict [ list \
-   CONFIG.NUM_PORTS {3} \
+   CONFIG.NUM_PORTS {4} \
  ] $xlconcat_1
 
   # Create instance: zynq_ultra_ps_e_0, and set properties
@@ -2292,23 +2299,25 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM0_LPD [get_bd_intf_pins hier_arm_peripheral/S00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM0_LPD]
 
   # Create port connections
+  connect_bd_net -net assertion_failed_1 [get_bd_ports assertion_failed] [get_bd_pins xlconcat_1/In3]
   connect_bd_net -net axi_gpio_0_gpio_io_o [get_bd_ports corerstn] [get_bd_pins hier_arm_peripheral/corerstn]
   connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_ports uncoreclk] [get_bd_pins hier_arm_peripheral/uncoreclk] [get_bd_pins hier_clkrst/uncoreclk] [get_bd_pins hier_rvcore_peripheral/uncoreclk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_lpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/saxihp0_fpd_aclk]
   connect_bd_net -net hier_arm_peripheral_interrupt [get_bd_pins hier_arm_peripheral/interrupt] [get_bd_pins xlconcat_1/In2]
-  connect_bd_net -net hier_clkrst_coreclk [get_bd_ports coreclk] [get_bd_pins hier_clkrst/coreclk]
+  connect_bd_net -net hier_clkrst_coreclk [get_bd_ports coreclk] [get_bd_pins hier_arm_peripheral/coreclk] [get_bd_pins hier_clkrst/coreclk]
   connect_bd_net -net hier_dma_mm2s_introut [get_bd_pins hier_arm_peripheral/mm2s_introut] [get_bd_pins xlconcat_1/In0]
   connect_bd_net -net hier_dma_s2mm_introut [get_bd_pins hier_arm_peripheral/s2mm_introut] [get_bd_pins xlconcat_1/In1]
   connect_bd_net -net hier_rvcore_peripheral_rvcore_intrs [get_bd_ports intrs] [get_bd_pins hier_rvcore_peripheral/intrs]
+  connect_bd_net -net incorerstn [get_bd_pins hier_arm_peripheral/incorerstn] [get_bd_pins hier_clkrst/corerstn]
   connect_bd_net -net proc_sys_reset_1_peripheral_aresetn [get_bd_ports uncorerstn] [get_bd_pins hier_arm_peripheral/uncorerstn] [get_bd_pins hier_clkrst/uncorerstn] [get_bd_pins hier_rvcore_peripheral/uncorerstn]
   connect_bd_net -net rvcore_uncorerst_interconnect_aresetn [get_bd_pins hier_arm_peripheral/S00_ARESETN] [get_bd_pins hier_clkrst/interconnect_aresetn] [get_bd_pins hier_rvcore_peripheral/ARESETN]
   connect_bd_net -net rx_1 [get_bd_pins hier_arm_peripheral/tx] [get_bd_pins hier_rvcore_peripheral/rx]
   connect_bd_net -net rx_2 [get_bd_pins hier_arm_peripheral/rx] [get_bd_pins hier_rvcore_peripheral/tx]
   connect_bd_net -net xlconcat_1_dout [get_bd_pins xlconcat_1/dout] [get_bd_pins zynq_ultra_ps_e_0/pl_ps_irq0]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk1 [get_bd_pins hier_clkrst/clk_in1] [get_bd_pins rst_ps8_0_99M/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins hier_clkrst/resetn] [get_bd_pins hier_rvcore_peripheral/sys_rst_n] [get_bd_pins rst_ps8_0_99M/ext_reset_in] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk1 [get_bd_pins hier_clkrst/clk_in1] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins hier_clkrst/resetn] [get_bd_pins hier_rvcore_peripheral/sys_rst_n] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
 
   # Create address segments
-  assign_bd_address -offset 0x80030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs AXI_CNT/Reg] -force
+  assign_bd_address -offset 0x80060000 -range 0x00002000 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs AXI_CNT/Reg] -force
   assign_bd_address -offset 0x80020000 -range 0x00001000 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs hier_arm_peripheral/axi_dma_arm/S_AXI_LITE/Reg] -force
   assign_bd_address -offset 0x80000000 -range 0x00001000 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs hier_arm_peripheral/axi_uartlite_0/S_AXI/Reg] -force
   assign_bd_address -offset 0x80010000 -range 0x00001000 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs hier_arm_peripheral/corerst/S_AXI/Reg] -force

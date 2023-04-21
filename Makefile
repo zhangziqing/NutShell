@@ -37,6 +37,9 @@ $(TOP_V): $(SCALA_FILE)
 	@$(ASSERTION_TOP_GEN-y)
 deploy: build/top.zip
 
+assertion_cnt:
+	mill chiselModule.runMain device.AXI4CNTTop -td build --output-file axi_cnt.v
+	sed -i -e 's/_\(aw\|ar\|w\|r\|b\)_\(\|bits_\)/_\1/g' axi_cnt.v
 
 build/top.zip: $(TOP_V)
 	@zip -r $@ $< $<.conf build/*.anno.json

@@ -17,6 +17,7 @@ PRJ_ROOT = board/$(BOARD)/build/$(PRJ_FULL)
 XPR_FILE = $(PRJ_ROOT)/$(PRJ_FULL).xpr
 $(XPR_FILE):
 	make -C .. BOARD=$(BOARD)
+	make -C .. assertion_cnt
 	vivado $(VIVADO_FLAG) -mode batch -source board/$(BOARD)/mk.tcl -tclargs $(PRJ_FULL) $(STANDALONE)
 
 project: $(XPR_FILE)
