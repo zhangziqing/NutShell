@@ -21,7 +21,13 @@ module system_top (
   `axi_wire(NutShell_io_mem, 64, 1);
   `axi_wire(NutShell_io_mmio, 64, 1);
   `axilite_wire(AXI_CNT);
-  `axi_wire(AXI_interal, 32, 16);
+  wire            assert_clk;
+  wire            assert_rstn;
+  wire [ 31 : 0 ] cnt_data;
+  wire [ 31 : 0 ] cnt_addr;
+  wire            cnt_req;
+  wire            cnt_ack;
+  wire            assertion_failed;
   
   // Added signal wires for modified NutShell_peripheral block design
   wire NutShell_reset;
@@ -36,6 +42,7 @@ module system_top (
   wire corerstn;
   wire uncoreclk;
   wire uncorerstn;
+  wire core_domain_rstn;
 
   wire [4:0] intrs;
 
@@ -61,6 +68,7 @@ module system_top (
     .corerstn(corerstn),
     .uncoreclk(uncoreclk),
     .uncorerstn(uncorerstn),
+    .core_domain_rstn(core_domain_rstn),
     .assertion_failed(assertion_failed)
   );
 
@@ -120,17 +128,13 @@ module system_top (
     .NutShell_io_ila_WBUrfData(NutShell_io_ila_WBUrfData),
     .NutShell_io_ila_InstrCnt(NutShell_io_ila_InstrCnt)
   );
-  wire assert_clk;
-  wire assert_rstn;
-  wire  [ 31 : 0 ] cnt_data;
-  wire [ 31 : 0 ] cnt_addr;
-  wire            cnt_req;
-  wire             cnt_ack;
-  wire             assertion_failed;
+  
   `define connect_external(name)\
         .io_extra``_``name(cnt``_``name)
         
   AXI4CNT axi4cnt_i(
+    .clock(clk),
+    .reset(!core_domain_rstn),
     `axilite_connect_if(io_in, AXI_CNT),
     `connect_external(data),
     `connect_external(ack),

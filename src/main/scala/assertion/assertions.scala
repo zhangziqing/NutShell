@@ -95,6 +95,7 @@ class CacheChecker extends BlackBox(Map("TAG_WIDTH"->19)) with HasBlackBoxResour
         val stage3MetaDirty = Input(Bool())
         val stage3MetaTag = Input(UInt(19.W))
         val memReqValid = Input(Bool())
+        val miss = Input(Bool())
     })
     addResource("/assertion_cache_checker.sv")
 }

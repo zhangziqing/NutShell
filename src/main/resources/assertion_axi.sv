@@ -58,7 +58,7 @@ module AXIChecker#(
 
     assert_last_keep_stable: 
         assert property (wlast_keep_stable) //////$display ("OK last_keep_stable is assert");
-        else $warning ("you are  writing last_keep_stable shit ");
+        else $warning ("you are  writing last_keep_stable error ");
 
     // 2
     // keep stable while no accepted
@@ -70,7 +70,7 @@ module AXIChecker#(
 
     assert_wdata: 
         assert property (aw_data_keep_stable) //$display ("OK aw_data_keep_stable is assert");
-        else $warning ("you are  aw_data_keep_stable wready_reset shit ");
+        else $warning ("you are  aw_data_keep_stable wready_reset error ");
 
 
     // 4
@@ -83,7 +83,7 @@ module AXIChecker#(
 
     assert_r_last_keep: 
         assert property (r_last_keep_stable) //$display ("OK r_last_keep_stable is assert");
-        else $warning ("you are  writing r_last_keep_stable shit ");
+        else $warning ("you are  writing r_last_keep_stable error ");
 
     //5
     // keep stable while no accepted
@@ -95,7 +95,7 @@ module AXIChecker#(
 
     assert_r_keep_stable_rdata: 
         assert property (r_data_keep_stable) //$display ("OK r_data_keep_stable is assert");
-        else $warning ("you are eriting r_data_keep_stable  shit ");
+        else $warning ("you are eriting r_data_keep_stable  error ");
 
      property araddr_keep_stable;
         @(posedge clk)
@@ -105,7 +105,7 @@ module AXIChecker#(
 
     assert_araddr_keep_stable: 
         assert property (araddr_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  araddr_stable shit ");
+        else $warning ("you are  araddr_stable error ");
     
     property arprot_keep_stable;
         @(posedge clk)
@@ -115,7 +115,7 @@ module AXIChecker#(
 
     assert_arprot_keep_stable: 
         assert property (arprot_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  arprot_stable shit ");
+        else $warning ("you are  arprot_stable error ");
     
     property arsize_keep_stable;
         @(posedge clk)
@@ -125,7 +125,7 @@ module AXIChecker#(
 
     assert_arsize_keep_stable: 
         assert property (arsize_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  arsize_stable shit ");
+        else $warning ("you are  arsize_stable error ");
     
     property arburst_keep_stable;
         @(posedge clk)
@@ -135,7 +135,7 @@ module AXIChecker#(
 
     assert_arburst_keep_stable: 
         assert property (arburst_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  arburst_stable shit ");
+        else $warning ("you are  arburst_stable error ");
     
     property arlock_keep_stable;
         @(posedge clk)
@@ -145,7 +145,7 @@ module AXIChecker#(
 
     assert_arlock_keep_stable: 
         assert property (arlock_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  arlock_stable shit ");
+        else $warning ("you are  arlock_stable error ");
     
     property arcache_keep_stable;
         @(posedge clk)
@@ -155,7 +155,7 @@ module AXIChecker#(
 
     assert_arcache_keep_stable: 
         assert property (arcache_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  arcache_stable shit ");
+        else $warning ("you are  arcache_stable error ");
     
     property arid_keep_stable;
         @(posedge clk)
@@ -165,7 +165,7 @@ module AXIChecker#(
 
     assert_arid_keep_stable: 
         assert property (arid_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  arid_stable shit ");
+        else $warning ("you are  arid_stable error ");
     
     property aruser_keep_stable;
         @(posedge clk)
@@ -175,7 +175,7 @@ module AXIChecker#(
 
     assert_aruser_keep_stable: 
         assert property (aruser_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  aruser_stable shit ");
+        else $warning ("you are  aruser_stable error ");
     
     property arqos_keep_stable;
         @(posedge clk)
@@ -185,7 +185,7 @@ module AXIChecker#(
 
     assert_arqos_keep_stable: 
         assert property (arqos_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  arqos_stable shit ");
+        else $warning ("you are  arqos_stable error ");
     
     property rdata_keep_stable;
         @(posedge clk)
@@ -195,7 +195,7 @@ module AXIChecker#(
 
     assert_rdata_keep_stable: 
         assert property (rdata_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  rdata_stable shit ");
+        else $warning ("you are  rdata_stable error ");
     
     property ruser_keep_stable;
         @(posedge clk)
@@ -205,7 +205,7 @@ module AXIChecker#(
 
     assert_ruser_keep_stable: 
         assert property (ruser_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  ruser_stable shit ");
+        else $warning ("you are  ruser_stable error ");
     
     property rid_keep_stable;
         @(posedge clk)
@@ -215,7 +215,7 @@ module AXIChecker#(
 
     assert_rid_keep_stable: 
         assert property (rid_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  rid_stable shit ");
+        else $warning ("you are  rid_stable error ");
     
     property rresp_keep_stable;
         @(posedge clk)
@@ -225,7 +225,7 @@ module AXIChecker#(
 
     assert_rresp_keep_stable: 
         assert property (rresp_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  rresp_stable shit ");
+        else $warning ("you are  rresp_stable error ");
     
     property wdata_keep_stable;
         @(posedge clk)
@@ -235,7 +235,7 @@ module AXIChecker#(
 
     assert_wdata_keep_stable: 
         assert property (wdata_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  wdata_stable shit ");
+        else $warning ("you are  wdata_stable error ");
     
     property awaddr_keep_stable;
         @(posedge clk)
@@ -245,7 +245,7 @@ module AXIChecker#(
 
     assert_awaddr_keep_stable: 
         assert property (awaddr_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  awaddr_stable shit ");
+        else $warning ("you are  awaddr_stable error ");
     
     property awprot_keep_stable;
         @(posedge clk)
@@ -255,7 +255,7 @@ module AXIChecker#(
 
     assert_awprot_keep_stable: 
         assert property (awprot_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  awprot_stable shit ");
+        else $warning ("you are  awprot_stable error ");
     
     property awsize_keep_stable;
         @(posedge clk)
@@ -265,7 +265,7 @@ module AXIChecker#(
 
     assert_awsize_keep_stable: 
         assert property (awsize_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  awsize_stable shit ");
+        else $warning ("you are  awsize_stable error ");
     
     property awburst_keep_stable;
         @(posedge clk)
@@ -275,7 +275,7 @@ module AXIChecker#(
 
     assert_awburst_keep_stable: 
         assert property (awburst_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  awburst_stable shit ");
+        else $warning ("you are  awburst_stable error ");
     
     property awlock_keep_stable;
         @(posedge clk)
@@ -285,7 +285,7 @@ module AXIChecker#(
 
     assert_awlock_keep_stable: 
         assert property (awlock_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  awlock_stable shit ");
+        else $warning ("you are  awlock_stable error ");
     
     property awcache_keep_stable;
         @(posedge clk)
@@ -295,7 +295,7 @@ module AXIChecker#(
 
     assert_awcache_keep_stable: 
         assert property (awcache_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  awcache_stable shit ");
+        else $warning ("you are  awcache_stable error ");
     
     property awid_keep_stable;
         @(posedge clk)
@@ -305,7 +305,7 @@ module AXIChecker#(
 
     assert_awid_keep_stable: 
         assert property (awid_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  awid_stable shit ");
+        else $warning ("you are  awid_stable error ");
     
     property awuser_keep_stable;
         @(posedge clk)
@@ -315,7 +315,7 @@ module AXIChecker#(
 
     assert_awuser_keep_stable: 
         assert property (awuser_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  awuser_stable shit ");
+        else $warning ("you are  awuser_stable error ");
     
     property awqos_keep_stable;
         @(posedge clk)
@@ -325,7 +325,7 @@ module AXIChecker#(
 
     assert_awqos_keep_stable: 
         assert property (awqos_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  awqos_stable shit ");
+        else $warning ("you are  awqos_stable error ");
     
 
     property buser_keep_stable;
@@ -336,7 +336,7 @@ module AXIChecker#(
 
     assert_buser_keep_stable: 
         assert property (buser_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  buser_stable shit ");
+        else $warning ("you are  buser_stable error ");
     
     property bid_keep_stable;
         @(posedge clk)
@@ -346,7 +346,7 @@ module AXIChecker#(
 
     assert_bid_keep_stable: 
         assert property (bid_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  bid_stable shit ");
+        else $warning ("you are  bid_stable error ");
     
     property bresp_keep_stable;
         @(posedge clk)
@@ -356,7 +356,7 @@ module AXIChecker#(
 
     assert_bresp_keep_stable: 
         assert property (bresp_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  bresp_stable shit ");
+        else $warning ("you are  bresp_stable error ");
     
     property wstrb_keep_stable;
         @(posedge clk)
@@ -366,7 +366,7 @@ module AXIChecker#(
 
     assert_wstrb_keep_stable: 
         assert property (wstrb_keep_stable) //$display ("OK r_keep_stable is assert");
-        else $warning ("you are  wstrb_stable shit ");
+        else $warning ("you are  wstrb_stable error ");
     
 
 /*  
@@ -379,7 +379,7 @@ module AXIChecker#(
     endproperty
     assert_write_dependency: 
         assert property(a_write_dependency) //$display ("OK write_dependency is assert");
-        else $warning ("you are  write_dependency shit ");
+        else $warning ("you are  write_dependency error ");
 
     // 8
     // axi_read dependency
@@ -390,7 +390,7 @@ module AXIChecker#(
 
     always_comb_8: 
         assert property(a_read_channel_dependency) //$display ("OK a_read_channel_dependency is assert");
-        else $warning ("you are  write_dependency wready_reset shit ");
+        else $warning ("you are  write_dependency wready_reset error ");
 */
 
     //9
@@ -402,7 +402,7 @@ module AXIChecker#(
 
     always_comb_9:
         assert property (wvalid_reset) //$display ("OK wvalid_reset is assert"); 
-        else $warning ("you are  writing wvalid_reset shit ");
+        else $warning ("you are  writing wvalid_reset error ");
     
     // 10
     // dont awvalid when reset
@@ -413,7 +413,7 @@ module AXIChecker#(
 
     always_comb_10:
         assert property (awvalid_reset) //$display ("OK awvalid_reset is assert"); 
-        else $warning ("you are  writing awvalid_reset shit ");
+        else $warning ("you are  writing awvalid_reset error ");
 
     // 11
     // dont arvalid when reset
@@ -424,7 +424,7 @@ module AXIChecker#(
 
     assert_arvalid_reset:
         assert property (awvalid_reset) //$display ("OK arvalid_reset is assert"); 
-        else $warning ("you are  writing arvalid_reset shit ");
+        else $warning ("you are  writing arvalid_reset error ");
     
     // 12
     // dont bvalid when reset
@@ -435,7 +435,7 @@ module AXIChecker#(
 
     always_comb_12:
         assert property (bvalid_reset) //$display ("OK bvalid_reset is assert"); 
-        else $warning ("you are  writing bvalid_reset shit ");
+        else $warning ("you are  writing bvalid_reset error ");
 
     // 13
     // dont rvalid when reset
@@ -446,7 +446,7 @@ module AXIChecker#(
 
     always_comb_13:
         assert property (rvalid_reset) //$display ("OK rvalid_reset is assert"); 
-        else $warning ("you are  writing rvalid_reset shit ");
+        else $warning ("you are  writing rvalid_reset error ");
 
     // 14
     // dont axi_arready when reset
@@ -457,7 +457,7 @@ module AXIChecker#(
 
     always_comb_14: 
         assert property (a1_ready_reset) //$display ("OK a1_ready_reset is assert"); 
-        else $warning ("you are  writing a1_ready_reset shit ");
+        else $warning ("you are  writing a1_ready_reset error ");
 
     // 15
     // dont axi_awready axi_when axi_reset
@@ -468,7 +468,7 @@ module AXIChecker#(
 
     always_comb_114: 
         assert property (a2_ready_reset) //$display ("OK a2_ready_reset is assert"); 
-        else $warning ("you are  writing a2_ready_reset shit ");
+        else $warning ("you are  writing a2_ready_reset error ");
 
     //16
     // dont axi_bready axi_ready axi_when axi_reset
@@ -479,7 +479,7 @@ module AXIChecker#(
 
     always_comb_15: 
         assert property (b1_ready_reset) //$display ("OK b1_ready_reset is assert"); 
-        else $warning ("you are  writing b1_ready_reset shit ");
+        else $warning ("you are  writing b1_ready_reset error ");
 
     //17
     // dont axi_rready axi_ready axi_when axi_reset
@@ -490,7 +490,7 @@ module AXIChecker#(
 
     always_comb_16: 
         assert property (rready_reset) //$display ("OK rready_reset is assert"); 
-        else $warning ("you are  writing rready_reset shit ");
+        else $warning ("you are  writing rready_reset error ");
     //18
     // dont axi_wready axi_ready axi_when axi_reset
     property wready_reset;
@@ -500,7 +500,7 @@ module AXIChecker#(
 
     always_comb_17:  
         assert property (wready_reset) //$display ("OK wready_reset is assert"); 
-        else $warning ("you are  writing wready_reset shit ");
+        else $warning ("you are  writing wready_reset error ");
 
     // reserved_burst
     property reserved_wburst;

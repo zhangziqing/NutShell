@@ -715,6 +715,7 @@ proc create_root_design { parentCell } {
 
   # Create ports
   set assertion_failed [ create_bd_port -dir I -type intr assertion_failed ]
+  set core_domain_rstn [ create_bd_port -dir O -from 0 -to 0 -type rst core_domain_rstn ]
   set coreclk [ create_bd_port -dir O -type clk coreclk ]
   set_property -dict [ list \
    CONFIG.ASSOCIATED_BUSIF {AXI_CNT} \
@@ -2307,7 +2308,7 @@ proc create_root_design { parentCell } {
   connect_bd_net -net hier_dma_mm2s_introut [get_bd_pins hier_arm_peripheral/mm2s_introut] [get_bd_pins xlconcat_1/In0]
   connect_bd_net -net hier_dma_s2mm_introut [get_bd_pins hier_arm_peripheral/s2mm_introut] [get_bd_pins xlconcat_1/In1]
   connect_bd_net -net hier_rvcore_peripheral_rvcore_intrs [get_bd_ports intrs] [get_bd_pins hier_rvcore_peripheral/intrs]
-  connect_bd_net -net incorerstn [get_bd_pins hier_arm_peripheral/incorerstn] [get_bd_pins hier_clkrst/corerstn]
+  connect_bd_net -net incorerstn [get_bd_ports core_domain_rstn] [get_bd_pins hier_arm_peripheral/incorerstn] [get_bd_pins hier_clkrst/corerstn]
   connect_bd_net -net proc_sys_reset_1_peripheral_aresetn [get_bd_ports uncorerstn] [get_bd_pins hier_arm_peripheral/uncorerstn] [get_bd_pins hier_clkrst/uncorerstn] [get_bd_pins hier_rvcore_peripheral/uncorerstn]
   connect_bd_net -net rvcore_uncorerst_interconnect_aresetn [get_bd_pins hier_arm_peripheral/S00_ARESETN] [get_bd_pins hier_clkrst/interconnect_aresetn] [get_bd_pins hier_rvcore_peripheral/ARESETN]
   connect_bd_net -net rx_1 [get_bd_pins hier_arm_peripheral/tx] [get_bd_pins hier_rvcore_peripheral/rx]

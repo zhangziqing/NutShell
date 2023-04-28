@@ -34,6 +34,7 @@ trait HasSoCParameter {
   val HasPrefetch = Settings.get("HasPrefetch")
 }
 
+
 class ILABundle extends NutCoreBundle {
   val WBUpc = UInt(VAddrBits.W)
   val WBUvalid = UInt(1.W)
@@ -126,13 +127,11 @@ class NutShell(implicit val p: NutCoreConfig) extends Module with HasSoCParamete
   BoringUtils.addSource(meipSync, "meip")
 
   if (Settings.get("AXIChecker")){
-    val axiChecker = Module(new AXIChecker)
-    axiChecker.io.clk := clock
+    val axiChecker = Module(new AXICheckWrapper)
     axiChecker.io.axi := io.mem 
     axiChecker.io.axi_resetn := !reset.asBool
     if (p.FPGAPlatform){
       val axiCheckerMMIO = Module(new AXIChecker)
-      axiCheckerMMIO.io.clk := clock
       axiCheckerMMIO.io.axi := io.mmio
       axiCheckerMMIO.io.axi_resetn := !reset.asBool
     }
@@ -140,7 +139,7 @@ class NutShell(implicit val p: NutCoreConfig) extends Module with HasSoCParamete
 
   // ILA
   if (p.FPGAPlatform) {
-    def BoringUtilsConnect(sink: UInt, id: String) {
+    def BoringUtilsConnect(sink: UInt, id: String):Unit = {
       val temp = WireInit(0.U(64.W))
       BoringUtils.addSink(temp, id)
       sink := temp

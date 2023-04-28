@@ -112,7 +112,9 @@ object BugBaseEnable {
 }
 
 object Hardssert {
-  def apply() = BugBaseEnable() ++ AssertEnable()
+  def apply(useAssertion:Boolean) = BugBaseEnable() ++ AssertEnable() ++ Map(
+    "UseAssertion" -> useAssertion
+  )
 }
 object Settings {
   var settings: Map[String, AnyVal] = DefaultSettings()

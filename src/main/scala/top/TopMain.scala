@@ -54,8 +54,9 @@ object TopMain extends App {
     case "ooo"  => OOOSettings()
     case "embedded"=> EmbededSettings()
   } ) ++ ( bug match {
-    case "y" => Hardssert()
-    case _ => Hardssert().mapValues(x => false)
+    case "assert" => Hardssert(true)
+    case "ila" =>Hardssert(false)
+    case _ => Hardssert(false).mapValues(x => false)
   })
   s.foreach{Settings.settings += _} // add and overwrite DefaultSettings
   println("====== Settings = (" + board + ", " +  core + ") ======")

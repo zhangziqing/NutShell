@@ -354,3 +354,4 @@ fpga/.Xil/
 
 # vivado
 vivado_*
+.Xil
