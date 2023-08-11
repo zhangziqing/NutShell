@@ -21,6 +21,7 @@ import bus.axi4.{AXI4, AXI4Lite}
 import bus.simplebus._
 import device.{AXI4CLINT, AXI4PLIC}
 import top.Settings
+import ENCORE._
 
 import chisel3._
 import chisel3.util._
@@ -28,6 +29,7 @@ import chisel3.util.experimental.BoringUtils
 
 trait HasSoCParameter {
   val EnableILA = Settings.get("EnableILA")
+  val EnableENCORE = Settings.get("EnableENCORE")
   val HasL2cache = Settings.get("HasL2cache")
   val HasPrefetch = Settings.get("HasPrefetch")
 }
@@ -48,6 +50,9 @@ class NutShell(implicit val p: NutCoreConfig) extends Module with HasSoCParamete
     val frontend = Flipped(new AXI4)
     val meip = Input(UInt(Settings.getInt("NrExtIntr").W))
     val ila = if (p.FPGAPlatform && EnableILA) Some(Output(new ILABundle)) else None
+    val instCommit = if (p.FPGAPlatform && EnableENCORE) Some(Output(new ENCOREInstrCommitIO)) else None
+    val archEvent = if (p.FPGAPlatform && EnableENCORE) Some(Output(new ENCOREArchEventIO)) else None
+    val archIntState = if (p.FPGAPlatform && EnableENCORE) Some(Output(new ENCOREArchIntRegStateIO)) else None
   })
 
   val nutcore = Module(new NutCore)
@@ -141,4 +146,18 @@ class NutShell(implicit val p: NutCoreConfig) extends Module with HasSoCParamete
     BoringUtilsConnect(ila.WBUrfData  ,"ilaWBUrfData")
     BoringUtilsConnect(ila.InstrCnt   ,"ilaInstrCnt")
   }
+  if (p.FPGAPlatform) {
+    val dummyInstrCommit = WireInit(0.U.asTypeOf(new ENCOREInstrCommitIO))
+    val instrCommit = io.instCommit.getOrElse(dummyInstrCommit)
+    MonitorBoringUtils.assignSink(instrCommit, "instr_commit_")
+    val dummyArchEvent = WireInit(0.U.asTypeOf(new ENCOREArchEventIO))
+    val archEvent = io.archEvent.getOrElse(dummyArchEvent)
+    MonitorBoringUtils.assignSink(archEvent, "arch_event_")
+    val dummyArchIntRegState = WireInit(0.U.asTypeOf(new ENCOREArchIntRegStateIO))
+    val archIntState = io.archIntState.getOrElse(dummyArchIntRegState)
+    MonitorBoringUtils.assignSink(archIntState, "arch_int_state_")
+    // archIntState.gpr.zipWithIndex.foreach { case (data, i) =>
+    //   BoringUtils.addSink(data, f"arch_int_reg_$i")
+    // }
+   }
 }

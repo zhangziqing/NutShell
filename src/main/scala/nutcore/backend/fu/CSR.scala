@@ -21,6 +21,7 @@ import chisel3.util._
 import chisel3.util.experimental.BoringUtils
 
 import utils._
+import ENCORE._
 import top.Settings
 
 object CSROpType {
@@ -497,7 +498,7 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
 
   Debug(wen, "csr write: pc %x addr %x rdata %x wdata %x func %x\n", io.cfIn.pc, addr, rdata, wdata, func)
   Debug(wen, "[MST] time %d pc %x mstatus %x mideleg %x medeleg %x mode %x\n", GTimer(), io.cfIn.pc, mstatus, mideleg , medeleg, priviledgeMode)
-
+ 
   // MMU Permission Check
 
   // def MMUPermissionCheck(ptev: Bool, pteu: Bool): Bool = ptev && !(priviledgeMode === ModeU && !pteu) && !(priviledgeMode === ModeS && pteu && mstatusStruct.sum.asBool)
@@ -902,5 +903,12 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
     } else {
       BoringUtils.addSource(readWithScala(perfCntList("Minstret")._1), "ilaInstrCnt")
     }
+  }
+  if (p.FPGAPlatform) {
+    println("add arch event")
+    val encoreArchEvent = Module(new ENCOREArchEvent)
+    encoreArchEvent.io.intrNO := Mux(raiseIntr && io.instrValid && valid, intrNO, 0.U)
+    encoreArchEvent.io.cause  := Mux(raiseException && io.instrValid && valid, exceptionNO, 0.U)
+    encoreArchEvent.io.exceptionPC := SignExt(io.cfIn.pc, XLEN)
   }
 }

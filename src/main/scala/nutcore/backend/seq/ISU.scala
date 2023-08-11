@@ -20,6 +20,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.BoringUtils
 
+import ENCORE._
 import utils._
 
 // Sequential Inst Issue Unit 
@@ -57,6 +58,13 @@ class ISU(implicit val p: NutCoreConfig) extends NutCoreModule with HasRegFilePa
   io.out.valid := io.in(0).valid && src1Ready && src2Ready
 
   val rf = new RegFile
+
+  if (p.FPGAPlatform){
+    val encoreArchIntState = Module(new ENCOREArchIntRegState)
+    encoreArchIntState.io.getElements.zipWithIndex.foreach{ case (data, i) =>
+      data := rf.read(i.U)
+    }
+  }
 
   // out1
   io.out.bits.data.src1 := Mux1H(List(

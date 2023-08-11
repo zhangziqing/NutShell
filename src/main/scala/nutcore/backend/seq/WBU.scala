@@ -20,6 +20,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.BoringUtils
 import utils._
+import ENCORE._
 
 class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
   val io = IO(new Bundle {
@@ -58,5 +59,16 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
     BoringUtils.addSource(io.wb.rfWen, "ilaWBUrfWen")
     BoringUtils.addSource(io.wb.rfDest, "ilaWBUrfDest")
     BoringUtils.addSource(io.wb.rfData, "ilaWBUrfData")
+
+    val encoreInstrCommit         = Module(new ENCOREInstrCommit)
+    encoreInstrCommit.io.valid    := io.in.valid
+    encoreInstrCommit.io.skip     := io.in.bits.isMMIO
+    encoreInstrCommit.io.isRVC    := io.in.bits.decode.cf.instr(1,0)=/="b11".U
+    encoreInstrCommit.io.rfWen    := io.wb.rfWen && io.wb.rfDest =/= 0.U
+    encoreInstrCommit.io.rfDest   := io.wb.rfDest
+    encoreInstrCommit.io.rfData   := io.wb.rfData
+    encoreInstrCommit.io.pc       := io.in.bits.decode.cf.pc
+    encoreInstrCommit.io.instr    := io.in.bits.decode.cf.instr 
+
   }
 }
