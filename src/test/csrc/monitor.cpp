@@ -21,6 +21,10 @@ extern "C" void monitor(int trapCode, uint64_t trapPC, uint64_t cycleCnt, uint64
   g_instrCnt = instrCnt;
 }
 
+extern "C" void poke_simtime(const char *name) {
+  eprintf(ANSI_COLOR_MAGENTA "fault [%s]enable at time : [%ld] \n" ANSI_COLOR_RESET, name, g_cycleCnt);
+}
+
 void set_abort(void) {
   g_trapCode = STATE_ABORT;
 }

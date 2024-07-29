@@ -1,3 +1,4 @@
+
 package assertion
 
 import chisel3._
@@ -10,14 +11,15 @@ trait HasDebugParameter {
     val useILA = !useAssertion
 }
 
-class CacheCheckerWrapper(implicit val cacheConfig: CacheConfig) extends Module with HasNutCoreParameter with HasDebugParameter{
+class CacheCheckerWrapper(implicit val cacheConfig: CacheConfig)
+  extends Module with HasNutCoreParameter with HasDebugParameter{
     val io = IO(new Bundle{
         val stage1Out = DecoupledMon(Flipped(new Stage1IO))
         val stage2In  = DecoupledMon(Flipped(new Stage1IO))
         val stage2Out = DecoupledMon(Flipped(new Stage2IO))
         val stage3In  = DecoupledMon(Flipped(new Stage2IO))
         val flush = Input(UInt(2.W))
-        val memReqValid = Input(Bool()) 
+        val memReqValid = Input(Bool())
     })
     val mmio = WireInit(false.B)
     val hit  = WireInit(false.B)
@@ -61,4 +63,35 @@ class AXICheckWrapper extends Module with HasNutCoreParameter with HasDebugParam
     // } else if (useILA){
     //     BoringUtils.addSource(io.axi, "ilaAXI")
     // }
+}
+
+class CSRWrapper extends Module with HasNutCoreParameter with HasDebugParameter {
+    val io = IO(new Bundle {
+        val clk = Input(Clock())
+        val mstatus = Input(UInt(XLEN.W))
+        val mepc = Input(UInt(XLEN.W))
+        val mtvec = Input(UInt(XLEN.W))
+        val mie = Input(UInt(XLEN.W))
+        val mideleg = Input(UInt(XLEN.W))
+        val medeleg = Input(UInt(XLEN.W))
+        val mcause = Input(UInt(XLEN.W))
+        val scause = Input(UInt(XLEN.W))
+        val causeNO = Input(UInt(XLEN.W))
+        val raiseExceptionVec = Input(UInt(16.W))
+        val priviledgeMode = Input(UInt(2.W))
+        val raiseIntr = Input(Bool())
+        val raiseTrap = Input(Bool())
+        val uRet = Input(Bool())
+        val mRet = Input(Bool())
+        val sRet = Input(Bool())
+        val instValid = Input(Bool())
+    })
+    val stagedIO = io.getElements.map { case x => RegNext(x)}
+    val csrChecker = Module(new CSRChecker)
+    csrChecker.io.getElements.zip(stagedIO).map {
+        case (x, y) => x := y
+    }
+
+    csrChecker.io.clk := io.clk
+
 }

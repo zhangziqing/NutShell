@@ -3,10 +3,11 @@ module CSRChecker #(
 )(
     input logic clk,
     input logic [XLEN - 1 : 0 ] mstatus,
-    input logic [XLEN - 1 : 0 ] mepc, 
+    input logic [XLEN - 1 : 0 ] mepc,
     input logic [XLEN - 1 : 0 ] mtvec,
     input logic [XLEN - 1 : 0 ] mcause,
-    input logic [XLEN - 1 : 0 ] mie,  
+    input logic [XLEN - 1 : 0 ] scause,
+    input logic [XLEN - 1 : 0 ] mie,
     input logic [XLEN - 1 : 0 ] mideleg,
     input logic [XLEN - 1 : 0 ] medeleg,
     input logic [XLEN - 1 : 0 ] causeNO,
@@ -14,9 +15,9 @@ module CSRChecker #(
     input logic [ 1 : 0 ]       priviledgeMode,
     input logic raiseTrap,
     input logic raiseIntr,
-    input logic  uRet, 
-    input logic  sRet, 
-    input logic  mRet, 
+    input logic  uRet,
+    input logic  sRet,
+    input logic  mRet,
     input logic  instValid
 
 );
@@ -54,17 +55,19 @@ module CSRChecker #(
 
     mstatus_t status;
     assign status = mstatus;
-    logic m_mode_trap;
-    logic [ XLEN - 1 : 0 ] mdeleg;
-    assign mdeleg = raiseIntr ? mideleg : medeleg; 
-    assign m_mode_trap = mdeleg[causeNO[3 : 0]] && (priviledgeMode < mmode_code);
+    wire m_mode_trap;
+    wire [ XLEN - 1 : 0 ] mdeleg;
+    assign mdeleg = raiseIntr ? mideleg : medeleg;
+
+    // m_mode_trap is a trap that is **not** delegate to lower priviledgeMode
+    assign m_mode_trap = ~(mdeleg[causeNO[3 : 0]] && (priviledgeMode < mmode_code));
 
     initial begin
         if(XLEN != 64)
             $error("Unsupported XLEN %d", XLEN);
     end
 
-    // when trap flag raise 
+    // when trap flag raise
     property raise_trap_mstatus_mie;
         @(posedge clk)
             raiseTrap & m_mode_trap |=> status.ie.m == 0;
@@ -90,7 +93,9 @@ module CSRChecker #(
         @(posedge clk)
             raiseTrap & m_mode_trap |=> priviledgeMode == mmode_code;
     endproperty
-    
+
+    check_raise_trap_smode_priviledge_mode:
+        assert property (raise_trap_smode_priviledge_mode) else $finish;
     check_mstatus_mie:
         assert property (raise_trap_mstatus_mpie);
     check_mstatus_mpie:
@@ -148,33 +153,33 @@ module CSRChecker #(
     // priorty order
     property exc_priorty_break;
         @(posedge clk)
-            raiseExceptionVec[3] && !raiseIntr |=> mcause == 64'd3;
+            raiseExceptionVec[3] && !raiseIntr |=> (m_mode_trap && mcause == 64'd3) || ((!m_mode_trap) && scause == 64'd3);
     endproperty
     check_exc_priorty_break:
         assert property(exc_priorty_break);
 
     property exc_priorty_inst_pf;
         @(posedge clk)
-            raiseExceptionVec[12] && !raiseIntr 
-                && !raiseExceptionVec[3] |=> mcause == 64'd12;
+            raiseExceptionVec[12] && !raiseIntr
+                && !raiseExceptionVec[3] |=> (m_mode_trap && mcause == 64'd12) || ((!m_mode_trap) && scause == 64'd12);
     endproperty
     check_exc_priorty_inst_pf:
         assert property(exc_priorty_inst_pf);
-    
+
     property exc_priorty_inst_af;
         @(posedge clk)
-            raiseExceptionVec[1] && !raiseIntr 
-                &&!raiseExceptionVec[12] && !raiseExceptionVec[3] 
-            |=> mcause == 64'd1;
+            raiseExceptionVec[1] && !raiseIntr
+                &&!raiseExceptionVec[12] && !raiseExceptionVec[3]
+            |=> (m_mode_trap && mcause == 64'd1) || ((!m_mode_trap) && scause == 64'd1);
     endproperty
     check_exc_priorty_inst_af:
         assert property(exc_priorty_inst_af);
 
     property exc_priorty_illegal_inst;
         @(posedge clk)
-            raiseExceptionVec[2] && !raiseIntr 
-                && !raiseExceptionVec[1] &&!raiseExceptionVec[12] && !raiseExceptionVec[3] 
-            |=> mcause == 64'd2;
+            raiseExceptionVec[2] && !raiseIntr
+                && !raiseExceptionVec[1] &&!raiseExceptionVec[12] && !raiseExceptionVec[3]
+            |=> (m_mode_trap && mcause == 64'd2) || ((!m_mode_trap) && scause == 64'd2);
     endproperty
 
     check_exc_priorty_illegal_inst:

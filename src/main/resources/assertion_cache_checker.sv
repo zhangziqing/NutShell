@@ -14,7 +14,7 @@ module CacheChecker #(
   input [3 : 0]                 stage3MainState
 );
 
-    logic hit = cacheHit;
+    wire hit = cacheHit;
     property dont_hit_when_mmio;
         @(posedge clk) !(mmio && cacheHit);
     endproperty 

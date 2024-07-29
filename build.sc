@@ -21,8 +21,8 @@ trait HasChisel3 extends ScalaModule {
  )
 }
 
-trait HasChiselTests extends CrossSbtModule  {
-  object test extends Tests {
+trait HasChiselTests extends SbtModule  {
+  object test extends SbtModuleTests with TestModule.ScalaTest {
     override def ivyDeps = Agg(ivy"org.scalatest::scalatest:3.0.4", ivy"edu.berkeley.cs::chisel-iotesters:1.2+")
     def testFrameworks = Seq("org.scalatest.tools.Framework")
   }
@@ -35,7 +35,8 @@ trait HasMacroParadise extends ScalaModule {
   def compileIvyDeps = macroPlugins
 }
 
-object chiselModule extends CrossSbtModule with HasChisel3 with HasChiselTests with HasXsource211 with HasMacroParadise {
-  def crossScalaVersion = "2.11.12"
+object chiselModule extends SbtModule with ScalaModule with HasChiselTests with HasChisel3 with HasXsource211 with HasMacroParadise {
+  override def millSourcePath = os.pwd
+  def scalaVersion = "2.11.12"
 }
 

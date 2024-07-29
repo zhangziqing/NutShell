@@ -1,3 +1,4 @@
+
 package assertion
 
 import chisel3._
@@ -110,6 +111,7 @@ class CSRChecker extends BlackBox(Map("XLEN" -> 64)) with HasBlackBoxResource wi
         val mideleg = Input(UInt(XLEN.W))
         val medeleg = Input(UInt(XLEN.W))
         val mcause = Input(UInt(XLEN.W))
+        val scause = Input(UInt(XLEN.W))
         val causeNO = Input(UInt(XLEN.W))
         val raiseExceptionVec = Input(UInt(16.W))
         val priviledgeMode = Input(UInt(2.W))

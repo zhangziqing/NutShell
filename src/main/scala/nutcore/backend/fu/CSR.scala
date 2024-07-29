@@ -647,9 +647,10 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
 
   // Branch control
 
-  val deleg = Mux(raiseIntr, mideleg , medeleg)
+  val deleg = Mux(raiseIntr, mideleg, medeleg)
   // val delegS = ((deleg & (1 << (causeNO & 0xf))) != 0) && (priviledgeMode < ModeM);
-  val delegS = (deleg(causeNO(3,0))) && (priviledgeMode < ModeM)
+  val delegS = deleg(causeNO(3,0)) //&& (priviledgeMode < ModeM)
+  PokeSimTime(delegS && raiseExceptionIntr && (priviledgeMode === ModeM), "CSR privilege Mode Error")
   val tvalWen = !(hasInstrPageFault || hasLoadPageFault || hasStorePageFault || hasLoadAddrMisaligned || hasStoreAddrMisaligned) || raiseIntr // in nutcore-riscv64, no exception will come together with PF
 
   ret := isMret || isSret || isUret
@@ -866,7 +867,7 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
   def readWithScala(addr: Int): UInt = mapping(addr)._1
 
   if (Settings.get("CSRChecker")){
-    val csrChecker = Module(new CSRChecker)
+    val csrChecker = Module(new CSRWrapper)
     csrChecker.io.clk := clock
     csrChecker.io.mstatus := mstatus
     csrChecker.io.mepc := mepc
@@ -875,6 +876,7 @@ class CSR(implicit val p: NutCoreConfig) extends NutCoreModule with HasCSRConst{
     csrChecker.io.mideleg := mideleg
     csrChecker.io.medeleg := medeleg
     csrChecker.io.mcause := mcause
+    csrChecker.io.scause := scause
     csrChecker.io.uRet := isUret
     csrChecker.io.sRet := isSret
     csrChecker.io.mRet := isMret
